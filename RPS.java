@@ -1,10 +1,9 @@
-import jdk.internal.util.xml.impl.Input;
+package BestAppEver;
 
 import java.util.ArrayList;
 
 class RPS {
-    double result;
-    // Wanna read one double numeric////////////////////////// NOT THIS, ITS USEFULL ////////////////
+    private double result;
 
     //ant transform to Numeric
     private Numeric ReadMyNum(int ind, String sz) {
@@ -57,6 +56,9 @@ class RPS {
             probLen = 3;
         else if (cH == 'a')
             probLen = 4;
+        //ln
+        else if (cH == 'l')
+            probLen = 2;
 
         while (ind-i < probLen) {
             cRes += cH;
@@ -114,7 +116,7 @@ class RPS {
             action = act;
             if (action.equals("^"))
                 priority = 5;
-            else if (isTrigonometryF(action))
+            else if (isTrigonometryF(action) || action.equals("ln"))
                 priority = 4;
             else if ((action.equals("*")) || (action.equals("/")))
                 priority = 3;
@@ -127,7 +129,6 @@ class RPS {
 
         int length;
     }
-
 
     private String S;
 
@@ -154,7 +155,7 @@ class RPS {
             } else {
                 Action TempAct = ReadMyAct(i, S);
                 InputS.add(TempAct);
-                i += TempAct.length;;
+                i += TempAct.length;
             }
         }
     }
@@ -222,6 +223,7 @@ class RPS {
             } else {
                 Numeric TempNum = new Numeric(0);
                 switch (OutputS.get(i).action) {
+                    // be accurate with /, asin, acos, tg, ln!!!
                     case "+":
                         TempNum.me = TempStack.get(TempStack.size() - 2).me + TempStack.get(TempStack.size() - 1).me;
                         TempStack.remove(TempStack.size() - 1);
@@ -241,13 +243,23 @@ class RPS {
                         TempStack.add(TempNum);
                         break;
                     case "/":
-                        TempNum.me = TempStack.get(TempStack.size() - 2).me / TempStack.get(TempStack.size() - 1).me;
+                        try {
+                            TempNum.me = TempStack.get(TempStack.size() - 2).me / TempStack.get(TempStack.size() - 1).me;
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
+                        break;
+                    case "^":
+                        TempNum.me = Math.pow(TempStack.get(TempStack.size() - 2).me, TempStack.get(TempStack.size() - 1).me);
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.add(TempNum);
                         break;
-                    case "^":
-                        TempNum.me = Math.pow(TempStack.get(TempStack.size() - 2).me, TempStack.get(TempStack.size() - 1).me);
+                    case "%":
+                        TempNum.me = TempStack.get(TempStack.size() - 2).me % TempStack.get(TempStack.size() - 1).me;
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.add(TempNum);
@@ -263,35 +275,61 @@ class RPS {
                         TempStack.add(TempNum);
                         break;
                     case "tan":
-                        TempNum.me = Math.tan(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        try {
+                            TempNum.me = Math.tan(TempStack.get(TempStack.size() - 1).me);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
                         break;
                     case "atan":
-                        TempNum.me = Math.atan(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        try {
+                            TempNum.me = Math.atan(TempStack.get(TempStack.size() - 1).me);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
                         break;
                     case "asin":
-                        TempNum.me = Math.asin(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        try {
+                            TempNum.me = Math.asin(TempStack.get(TempStack.size() - 1).me);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
                         break;
                     case "acos":
-                        TempNum.me = Math.acos(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        try {
+                            TempNum.me = Math.acos(TempStack.get(TempStack.size() - 1).me);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
+                        break;
+                    case "ln":
+                        try {
+                            TempNum.me = Math.log(TempStack.get(TempStack.size() - 1).me);
+                            TempStack.remove(TempStack.size() - 1);
+                            TempStack.add(TempNum);
+                        } catch (Exception exc) {
+                            return Double.NaN;
+                        }
+                        break;
                     default:
                         break;
                 }
             }
-            i++;
-        }
+                i++;
+            }
         if (TempStack.size() == 1) {
             return TempStack.get(0).me;
         } else {
-            System.out.println("Error");
-            return -1d;
+            //System.out.println("Error");
+            return Double.NaN;
         }
     }
 
@@ -307,7 +345,7 @@ class RPS {
         result = DoAllWork(St);
     }
     RPS() {
-        result =0;
+        result = 0;
     }
 
 }

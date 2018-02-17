@@ -1,278 +1,363 @@
+package BestAppEver;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+import java.util.Set;
 import javax.swing.*;
 
-//TODO этот класс рисует окошко с кнопками и тд. (пользовательский интерфейс, распихай все по контейнерам, которые сделаешь себе ниже)
-//TODO сделать класс BackEnd, который будет обрабатывать все события
+//check marks "//new components" when add new things))
+public class MWindow implements ComponentListener {
 
-public class MWindow implements ActionListener {
-
-
-    //поле ввода чисел
-    JLabel jNumbers;
-    //Кнопки от 0 до 9
-
-    // теперь для математических действий(+; -; /; *; ^)
-
-    // и равно(=)
-
-    //ну и скобки
-
-    //И точка
-
-    //теперь метка(введите текст)
-    JLabel MyText;
-
-    //Теперь все для парсера, дабы можно было что-то считать
-    String BeforePars = "";
-    String znak;
-
-    int MyParser() {
-        int Result = -1;
-        BeforePars += "!";
-        //Используем BeforePars и считаем возвращаем int
-        int N1 = 0;
-        int N2 = 0;
-        char ch;
-
-        int i = 0;
-        ch = BeforePars.charAt(i);
-        //Считываем первое число
-        while ((ch >= '0') && (ch <= '9')) {
-
-            N1 = N1 * 10 + Integer.valueOf(Character.toString(BeforePars.charAt(i)));
-            i++;
-            ch = BeforePars.charAt(i);
-        }
-        // Запомним действие
-        //znak = Character.toString(BeforePars.charAt(i));
-        i++;
-        //Второе число
-        ch = BeforePars.charAt(i);
-        while ((ch >= '0') && (ch <= '9')) {
-
-            N2 = N2 * 10 + Integer.valueOf(Character.toString(BeforePars.charAt(i)));
-            i++;
-            ch = BeforePars.charAt(i);
-        }
-        //Выполняем действие
-        switch (znak) {
-            case "+":
-                Result = N1 + N2;
-                MyText.setText("Metka     ");
-                break;
-            case "-":
-                Result = N1 - N2;
-                MyText.setText("Metka     ");
-                break;
-            case "x":
-                Result = N1 * N2;
-                MyText.setText("Metka     ");
-                break;
-            case "/":
-                try {
-                    Result = N1 / N2;
-                    MyText.setText("Metka     ");
-                } catch (Exception exc) {
-                    MyText.setText("Делишь на 0");
-                    Result = Integer.MAX_VALUE;
-                }
-                break;
-            default:
-                MyText.setText("Сам считай");
-                break;
-        }
-        return Result;
+    private static GridBagConstraints SetPos(int grX, int grY, int sizeH, int sizeW) {
+        GridBagConstraints res = new GridBagConstraints();
+        res.fill = GridBagConstraints.BOTH;
+        res.gridx = grX;
+        res.gridy = grY;
+        res.gridwidth = sizeW;
+        res.gridheight = sizeH;
+        res.weightx = 1.0;
+        res.weighty = 1.0;
+        return res;
     }
 
-    //Возвращает истину, если нет знака в строке
-    boolean NoSign() {
-        char s;
-        for (int i = 0; i < BeforePars.length(); i++) {
-            s = BeforePars.charAt(i);
-            if (!((s >= '0') && (s <= '9'))) {
-                return false;
-            }
-        }
-        return true;
+    private static GridBagConstraints SetPos(int grX, int grY) {
+        GridBagConstraints res = new GridBagConstraints();
+        res.fill = GridBagConstraints.BOTH;
+        res.gridx = grX;
+        res.gridy = grY;
+        res.gridwidth = 1;
+        res.gridheight = 1;
+        res.weightx = 1.0;
+        res.weighty = 1.0;
+        return res;
     }
 
-    //Если есть знак - false, иначе true
-    boolean NoPointBeforeSign() {
-        int ind = -1;
-        char s;
-        // Сейчас запомню индекс знака
-        for (int i = 0; i < BeforePars.length(); i++) {
-            s = BeforePars.charAt(i);
-            if (!((s >= '0') && (s <= '9')) || s != '.') {
-                ind = i;
-            }
-        }
-        for (int i = 0; i < ind; i++) {
-            s = BeforePars.charAt(i);
-            if (s == '.')
-                return false;
-        }
-        return true;
-    }
+    static final double pi = 3.14;
+    static final double e = 2.7;
 
-    //Если есть знак - false, иначе true
-    boolean NoPointAfterSign() {
-        int ind = -1;
-        char s;
-        // Сейчас запомню индекс знака
-        for (int i = 0; i < BeforePars.length(); i++) {
-            s = BeforePars.charAt(i);
-            if (!((s >= '0') && (s <= '9')) || s != '.') {
-                ind = i;
-            }
-        }
-        for (int i = ind; i < BeforePars.length(); i++) {
-            s = BeforePars.charAt(i);
-            if (s == '.')
-                return false;
-        }
-        return true;
-    }
+    static int accuruty = 0;
 
-    //Меняем знак на Sign
-    void ChangeSign(char Sign) {
-        char[] MyBuffer = new char[BeforePars.length()];
-        int index = -1;
-        //Копирую все в массив, а потом обратно, но со сменой знака
-        for (int i = 0; i < BeforePars.length(); i++) {
-            MyBuffer[i] = BeforePars.charAt(i);
-            if ((MyBuffer[i] == '+') || (MyBuffer[i] == '-') ||
-                    (MyBuffer[i] == 'x') || (MyBuffer[i] == '/')) {
-                index = i;
-            }
-        }//Теперь у меня есть скопированный массив и индекс знака
-        BeforePars = "";
-        for (int i = 0; i < MyBuffer.length; i++) {
-            if (i != index) {
-                BeforePars += MyBuffer[i];
-            } else {
-                BeforePars += Sign;
-            }
-        } // Мы все скопировали и поменяли знак на требуемый
-    }
-
-    // Теперь конструкотор
-    MWindow() {
-        //Это главный контейнер!!!
-        JFrame myFrm = new JFrame("Kалькулятор");
-        myFrm.setLayout(new FlowLayout());
-        //myFrm.setBounds(150, 150, 230, 240 );
-       // myFrm.setSize(230, 210);// w=230, h=240
-        myFrm.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //Поле ввода на 15(наеюсь хватит)
-        jNumbers = new JLabel();
+    //im declorating my things
+    //new compnents
+    static JLabel mStr;
+    static JLabel mRes;
+    private static JButton button0;
+    private static JButton button1; private static JButton button2; private static JButton button3;
+    private static JButton button6; private static JButton button5; private static JButton button4;
+    private static JButton button7; private static JButton button8; private static JButton button9;
+    private static JButton buttonPi; private static JButton buttonE;
+    private static JButton buttonPlus;
+    private static JButton buttonMinus;
+    private static JButton buttonDivide;
+    private static JButton buttonMultiply;
+    private static JButton buttonPow;
+    private static JButton buttonEquall;
+    private static JButton buttonOBrace;
+    private static JButton buttonCBrace;
+    private static JButton buttonPoint;
+    private static JButton buttonDel;
+    private static JButton buttonClear;
+    private static JButton buttonSin;
+    private static JButton buttonCos;
+    private static JButton buttonTan;
+    private static JButton buttonAsin;
+    private static JButton buttonAcos;
+    private static JButton buttonAtan;
+    private static JButton buttonAns;
+    private static JButton buttonLn;
+    private static JButton buttonMod;
 
 
-        //Создаю кнопки
-        JButton button0 = new JButton("0");
-        JButton button1 = new JButton("1");
-        JButton button2 = new JButton("2");
-        JButton button3 = new JButton("3");
-        JButton button4 = new JButton("4");
-        JButton button5 = new JButton("5");
-        JButton button6 = new JButton("6");
-        JButton button7 = new JButton("7");
-        JButton button8 = new JButton("8");
-        JButton button9 = new JButton("9");
-        JButton buttonPlus = new JButton("+");
-        JButton buttonMinus = new JButton("-");
-        JButton buttonDivide = new JButton("/");
-        JButton buttonMultiply = new JButton("x");
+
+    public static void addComponentsToPane(Container pane) {
+        //new components
+        pane.setLayout(new GridBagLayout());
+        ButtonListner listner = new ButtonListner();
+
+        GridBagConstraints c = SetPos(1, 0, 1, 2);
+        c.fill = GridBagConstraints.NONE;
+        mStr = new JLabel(" ");
+        pane.add(mStr, c);
+
+        c = SetPos(3, 1, 1, 2);
+        c.fill = GridBagConstraints.NONE;
+        mRes = new JLabel(" ");
+        //System.out.println(mRes.getFont()); по дефолту 12
+        pane.add(mRes, c);
+
+        c = SetPos(2, 1);
+        buttonAns = new JButton("ans");
+        pane.add(buttonAns, c);
+
+        c = SetPos(0, 5);
+        button0 = new JButton("0");
+        pane.add(button0, c);
+
+        c = SetPos(0, 2);
+        button1 = new JButton("1");
+        pane.add(button1, c);
+
+        c = SetPos(1, 2);
+        button2 = new JButton("2");
+        pane.add(button2, c);
+
+        c = SetPos(2, 2);
+        button3 = new JButton("3");
+        pane.add(button3, c);
+
+        c = SetPos(0, 3);
+        button4 = new JButton("4");
+        pane.add(button4, c);
+
+        c = SetPos(1, 3);
+        button5 = new JButton("5");
+        pane.add(button5, c);
+
+        c = SetPos(2, 3);
+        button6 = new JButton("6");
+        pane.add(button6, c);
+
+        c = SetPos(0, 4);
+        button7 = new JButton("7");
+        pane.add(button7, c);
+
+        c = SetPos(1, 4);
+        button8 = new JButton("8");
+        pane.add(button8, c);
+
+        c = SetPos(2, 4);
+        button9 = new JButton("9");
+        pane.add(button9, c);
+
+        c = SetPos(3, 2);
+        buttonPlus = new JButton("+");
+        pane.add(buttonPlus, c);
+
+        c = SetPos(4, 2);
+        buttonMinus = new JButton("-");
+        pane.add(buttonMinus, c);
+
+        c = SetPos(4, 3);
+        buttonDivide = new JButton("/");
+        pane.add(buttonDivide, c);
+
+        c = SetPos(3, 3);
+        buttonMultiply = new JButton("x");
         buttonMultiply.setActionCommand("*");
-        JButton buttonPow = new JButton("^");
-        JButton buttonEquall = new JButton("=");
-        JButton buttonOBrace = new JButton("(");
-        JButton buttonCBrace = new JButton(")");
-        JButton buttonPoint = new JButton(".");
+        pane.add(buttonMultiply, c);
 
-        //Регистрирую приемники событий
-        //jNumbers.addActionListener(this);
-        button0.addActionListener(this);
-        button1.addActionListener(this);
-        button2.addActionListener(this);
-        button3.addActionListener(this);
-        button4.addActionListener(this);
-        button5.addActionListener(this);
-        button6.addActionListener(this);
-        button7.addActionListener(this);
-        button8.addActionListener(this);
-        button9.addActionListener(this);
-        buttonPlus.addActionListener(this);
-        buttonMinus.addActionListener(this);
-        buttonDivide.addActionListener(this);
-        buttonMultiply.addActionListener(this);
-        buttonPow.addActionListener(this);
-        buttonEquall.addActionListener(this);
-        buttonOBrace.addActionListener(this);
-        buttonCBrace.addActionListener(this);
-        buttonPoint.addActionListener(this);
+        c = SetPos(3, 4);
+        buttonPow = new JButton("^");
+        pane.add(buttonPow, c);
 
-        //Теперь делаю метку и добавляю компоненты на экран
-        //MyText = new JLabel("Metka     ");
-        myFrm.add(jNumbers);
-        //myFrm.add(MyText);
-        myFrm.add(button1);
-        myFrm.add(button2);
-        myFrm.add(button3);
-        myFrm.add(button4);
-        myFrm.add(button5);
-        myFrm.add(button6);
-        myFrm.add(button7);
-        myFrm.add(button8);
-        myFrm.add(button9);
-        myFrm.add(button0);
+        c = SetPos(0, 1, 1 , 2);
+        buttonEquall = new JButton("=");
+        buttonEquall.setBackground(Color.RED);
+        pane.add(buttonEquall, c);
 
-        myFrm.add(buttonPlus);
-        myFrm.add(buttonMinus);
-        myFrm.add(buttonMultiply);
-        myFrm.add(buttonDivide);
-        myFrm.add(buttonPow);
+        c = SetPos(2, 5);
+        buttonOBrace = new JButton("(");
+        pane.add(buttonOBrace, c);
 
-        myFrm.add(buttonOBrace);
-        myFrm.add(buttonCBrace);
+        c = SetPos(3, 5);
+        buttonCBrace = new JButton(")");
+        pane.add(buttonCBrace, c);
 
-        myFrm.add(buttonPoint);
-        myFrm.add(buttonEquall);
+        c = SetPos(1, 5);
+        buttonPoint = new JButton(".");
+        //buttonPoint
+        pane.add(buttonPoint, c);
 
-        //Делаю экран видемым
-        myFrm.setVisible(true);
-    }//Конец конструктора
+        c = SetPos(4, 4);
+        buttonDel = new JButton("<-");
+        pane.add(buttonDel, c);
 
-    public void actionPerformed(ActionEvent ae) {
-        String myComand = ae.getActionCommand();
-        //Тут будут новые знаки!!(надеюсь) TODO норм считалка
-        if (myComand.equals("=")) {
-            try {
-                RPS Worker = new RPS(BeforePars);
-                String res = Double.toString(Worker.result);
-                BeforePars = "";
-                BeforePars += res;
-                jNumbers.setText(BeforePars);
-            } catch (Exception exc) {
-                BeforePars = "";
-                jNumbers.setText(BeforePars);
-                MyText.setText("Sth wrong cause of you");
-            }
-        } else {
-            BeforePars += myComand;
-            jNumbers.setText(BeforePars);
-        }
+        c = SetPos(4, 5);
+        buttonClear = new JButton("C");
+        pane.add(buttonClear, c);
+
+        c = SetPos(0, 6);
+        buttonSin = new JButton("sin");
+        pane.add(buttonSin, c);
+
+        c = SetPos(1, 6);
+        buttonCos = new JButton("cos");
+        pane.add(buttonCos, c);
+
+        c = SetPos(2, 6);
+        buttonTan = new JButton("tan");
+        pane.add(buttonTan, c);
+
+        c = SetPos(0, 7);
+        buttonAsin = new JButton("asin");
+        pane.add(buttonAsin, c);
+
+        c = SetPos(1, 7);
+        buttonAcos = new JButton("acos");
+        pane.add(buttonAcos, c);
+
+        c = SetPos(2, 7);
+        buttonAtan = new JButton("atan");
+        pane.add(buttonAtan, c);
+
+        c = SetPos(3, 6);
+        buttonLn = new JButton("ln");
+        pane.add(buttonLn, c);
+
+        c = SetPos(4, 6);
+        buttonMod = new JButton("%");
+        pane.add(buttonMod, c);
+
+        c = SetPos(3, 7);
+        buttonPi = new JButton("pi");
+        buttonPi.setActionCommand(Double.toString(pi));
+        pane.add(buttonPi, c);
+
+        c = SetPos(4, 7);
+        buttonE = new JButton("e");
+        buttonE.setActionCommand(Double.toString(e));
+        pane.add(buttonE, c);
+
+        addToAll(listner);
+        //button = new JButton("wtf");
+        //c.fill = GridBagConstraints.HORIZONTAL;
+        //c.ipady = 0;       // установить первоночальный размер кнопки
+        //c.weighty = 1.0;   // установить отступ
+        // c.anchor = GridBagConstraints.PAGE_END; // установить кнопку в конец окна
+        //c.insets = new Insets(10, 0, 0, 0);  // поставить заглушку
+        //c.gridx = 1;       // выравнять компонент по Button 2
+        //c.gridwidth = 2;   // установить в 2 колонку
+        //c.gridy = 2;       // и 3 столбец
+        //pane.add(button, c);
 
     }
 
-    public static void main(String args[]) {
-        SwingUtilities.invokeLater(new Runnable() {
+    private static void addToAll(ActionListener actionListener) {
+        //new components
+        button0.addActionListener(actionListener);
+        button1.addActionListener(actionListener);
+        button2.addActionListener(actionListener);
+        button3.addActionListener(actionListener);
+        button6.addActionListener(actionListener);
+        button5.addActionListener(actionListener);
+        button4.addActionListener(actionListener);
+        button7.addActionListener(actionListener);
+        button8.addActionListener(actionListener);
+        button9.addActionListener(actionListener);
+        buttonPi.addActionListener(actionListener);
+        buttonE.addActionListener(actionListener);
+        buttonPlus.addActionListener(actionListener);
+        buttonMinus.addActionListener(actionListener);
+        buttonDivide.addActionListener(actionListener);
+        buttonMultiply.addActionListener(actionListener);
+        buttonPow.addActionListener(actionListener);
+        buttonEquall.addActionListener(actionListener);
+        buttonOBrace.addActionListener(actionListener);
+        buttonCBrace.addActionListener(actionListener);
+        buttonPoint.addActionListener(actionListener);
+        buttonDel.addActionListener(actionListener);
+        buttonClear.addActionListener(actionListener);
+        buttonSin.addActionListener(actionListener);
+        buttonCos.addActionListener(actionListener);
+        buttonTan.addActionListener(actionListener);
+        buttonAsin.addActionListener(actionListener);
+        buttonAcos.addActionListener(actionListener);
+        buttonAtan.addActionListener(actionListener);
+        buttonAns.addActionListener(actionListener);
+        buttonLn.addActionListener(actionListener);
+        buttonMod.addActionListener(actionListener);
+    }
+
+    private void createAndShowGUI() {
+        // Создание окна
+        JFrame frame = new JFrame("Calculator??");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.addComponentListener(this);
+
+        // Установить панель содержания
+        addComponentsToPane(frame.getContentPane());
+
+        // Показать окно
+        frame.pack();
+        frame.setVisible(true);
+        System.out.println(frame.getSize());
+    }
+
+    public void componentResized(ComponentEvent e) {
+        final int w = 200;
+        final int h = 200;
+        //final int S = w*h;
+        int wid = e.getComponent().getSize().width;
+        int heg = e.getComponent().getSize().height;
+        int startS = 12;
+        double ka = Math.sqrt(wid*heg/(w*h));
+        double newSize = startS*ka;
+        FontAll((int)newSize);
+    }
+
+    private void FontAll(int nSize) {
+        //new components
+        mStr.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        mRes.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonAns.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button0.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button1.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button2.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button3.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button6.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button5.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button4.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button7.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button8.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        button9.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonPi.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonE.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonPlus.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonMinus.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonDivide.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonMultiply.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonPow.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonEquall.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonOBrace.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonCBrace.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonPoint.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonDel.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonClear.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonSin.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonCos.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonTan.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonAsin.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonAcos.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonAtan.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonLn.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonMod.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+
+    }
+    /**
+     * Invoked when the component's position changes.
+     */
+    public void componentMoved(ComponentEvent e){}
+
+    /**
+     * Invoked when the component has been made visible.
+     */
+    public void componentShown(ComponentEvent e){}
+
+    /**
+     * Invoked when the component has been made invisible.
+     */
+    public void componentHidden(ComponentEvent e){}
+
+
+    public static void main(String[] args) {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new MWindow();
+                MWindow Window = new MWindow();
+                Window.createAndShowGUI();
             }
+            //окно было [width=230,height=193]
         });
     }
-
-
 }
