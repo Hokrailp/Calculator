@@ -5,7 +5,6 @@ import javafx.application.Application;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-
 //check marks "//new components" when add new things))
 public class MWindow implements ComponentListener {
 
@@ -33,13 +32,15 @@ public class MWindow implements ComponentListener {
         return res;
     }
 
-    static final double pi = 3.14;
-    static final double e = 2.7;
-
-    static int accuruty = 0;
+    static int accuruty = 2;
 
     //im declorating my things
-    //new compnents
+    //new components
+    final static String CALCANEL = "Панель с калькулятором";
+    final static String GRAFPANEL   = "Панель с графиком";
+
+    static JComboBox<String> combobox;
+
     static JLabel mStr;
     static JLabel mRes;
     private static JButton button0;
@@ -67,156 +68,188 @@ public class MWindow implements ComponentListener {
     private static JButton buttonAns;
     private static JButton buttonLn;
     private static JButton buttonMod;
-
-
+    private static JButton buttonaPP;
+    private static JButton buttonaMM;
 
     public static void addComponentsToPane(Container pane) {
         //new components
         pane.setLayout(new GridBagLayout());
         ButtonListner listner = new ButtonListner();
+        GridBagConstraints c = SetPos(0, 0, 1, 5);
+        combobox= new JComboBox<>(new String[] {CALCANEL, GRAFPANEL});
+        pane.add(combobox,c);
 
-        GridBagConstraints c = SetPos(1, 0, 1, 2);
+
+        int gridY = 1;
+        c = SetPos(0, gridY++, 1, 5);
         c.fill = GridBagConstraints.NONE;
         mStr = new JLabel(" ");
         pane.add(mStr, c);
 
-        c = SetPos(3, 1, 1, 2);
+        c = SetPos(0, gridY++, 1, 5);
         c.fill = GridBagConstraints.NONE;
         mRes = new JLabel(" ");
         //System.out.println(mRes.getFont()); по дефолту 12
         pane.add(mRes, c);
 
-        c = SetPos(2, 1);
-        buttonAns = new JButton("ans");
-        pane.add(buttonAns, c);
 
-        c = SetPos(0, 5);
-        button0 = new JButton("0");
-        pane.add(button0, c);
-
-        c = SetPos(0, 2);
-        button1 = new JButton("1");
-        pane.add(button1, c);
-
-        c = SetPos(1, 2);
-        button2 = new JButton("2");
-        pane.add(button2, c);
-
-        c = SetPos(2, 2);
-        button3 = new JButton("3");
-        pane.add(button3, c);
-
-        c = SetPos(0, 3);
-        button4 = new JButton("4");
-        pane.add(button4, c);
-
-        c = SetPos(1, 3);
-        button5 = new JButton("5");
-        pane.add(button5, c);
-
-        c = SetPos(2, 3);
-        button6 = new JButton("6");
-        pane.add(button6, c);
-
-        c = SetPos(0, 4);
-        button7 = new JButton("7");
-        pane.add(button7, c);
-
-        c = SetPos(1, 4);
-        button8 = new JButton("8");
-        pane.add(button8, c);
-
-        c = SetPos(2, 4);
-        button9 = new JButton("9");
-        pane.add(button9, c);
-
-        c = SetPos(3, 2);
-        buttonPlus = new JButton("+");
-        pane.add(buttonPlus, c);
-
-        c = SetPos(4, 2);
-        buttonMinus = new JButton("-");
-        pane.add(buttonMinus, c);
-
-        c = SetPos(4, 3);
-        buttonDivide = new JButton("/");
-        pane.add(buttonDivide, c);
-
-        c = SetPos(3, 3);
-        buttonMultiply = new JButton("x");
-        buttonMultiply.setActionCommand("*");
-        pane.add(buttonMultiply, c);
-
-        c = SetPos(3, 4);
-        buttonPow = new JButton("^");
-        pane.add(buttonPow, c);
-
-        c = SetPos(0, 1, 1 , 2);
+        //y = 2
+        c = SetPos(0, gridY, 1 , 2);
         buttonEquall = new JButton("=");
         buttonEquall.setBackground(Color.RED);
         pane.add(buttonEquall, c);
 
-        c = SetPos(2, 5);
-        buttonOBrace = new JButton("(");
-        pane.add(buttonOBrace, c);
+        c = SetPos(2, gridY);
+        buttonAns = new JButton("ans");
+        pane.add(buttonAns, c);
 
-        c = SetPos(3, 5);
-        buttonCBrace = new JButton(")");
-        pane.add(buttonCBrace, c);
+        c = SetPos(3, gridY);
+        buttonaPP = new JButton("a++");
+        pane.add(buttonaPP, c);
 
-        c = SetPos(1, 5);
-        buttonPoint = new JButton(".");
-        //buttonPoint
-        pane.add(buttonPoint, c);
+        c = SetPos(4, gridY);
+        buttonaMM = new JButton("a--");
+        pane.add(buttonaMM, c);
 
-        c = SetPos(4, 4);
+        gridY++;
+        //Y = 3
+        c = SetPos(0, gridY);
+        button1 = new JButton("1");
+        pane.add(button1, c);
+
+        c = SetPos(1, gridY);
+        button2 = new JButton("2");
+        pane.add(button2, c);
+
+        c = SetPos(2, gridY);
+        button3 = new JButton("3");
+        pane.add(button3, c);
+
+        c = SetPos(3, gridY);
+        buttonPlus = new JButton("+");
+        pane.add(buttonPlus, c);
+
+        c = SetPos(4, gridY);
+        buttonMinus = new JButton("-");
+        pane.add(buttonMinus, c);
+
+        gridY++;
+        //y = 4
+        c = SetPos(0, gridY);
+        button4 = new JButton("4");
+        pane.add(button4, c);
+
+        c = SetPos(1, gridY);
+        button5 = new JButton("5");
+        pane.add(button5, c);
+
+        c = SetPos(2, gridY);
+        button6 = new JButton("6");
+        pane.add(button6, c);
+
+        c = SetPos(4, gridY);
+        buttonDivide = new JButton("/");
+        pane.add(buttonDivide, c);
+
+        c = SetPos(3, gridY);
+        buttonMultiply = new JButton("*");
+        pane.add(buttonMultiply, c);
+
+        gridY++;
+        //y = 5
+
+        c = SetPos(0, gridY);
+        button7 = new JButton("7");
+        pane.add(button7, c);
+
+        c = SetPos(1, gridY);
+        button8 = new JButton("8");
+        pane.add(button8, c);
+
+        c = SetPos(2, gridY);
+        button9 = new JButton("9");
+        pane.add(button9, c);
+
+
+        c = SetPos(3, gridY);
+        buttonPow = new JButton("^");
+        pane.add(buttonPow, c);
+
+        c = SetPos(4, gridY);
         buttonDel = new JButton("<-");
         pane.add(buttonDel, c);
 
-        c = SetPos(4, 5);
+        gridY++;
+        //y =6
+        c = SetPos(0, gridY);
+        buttonPoint = new JButton(".");
+        pane.add(buttonPoint, c);
+
+        c = SetPos(1, gridY);
+        button0 = new JButton("0");
+        pane.add(button0, c);
+
+        c = SetPos(2, gridY);
+        buttonOBrace = new JButton("(");
+        pane.add(buttonOBrace, c);
+
+        c = SetPos(3, gridY);
+        buttonCBrace = new JButton(")");
+        pane.add(buttonCBrace, c);
+
+        c = SetPos(4, gridY);
         buttonClear = new JButton("C");
         pane.add(buttonClear, c);
 
-        c = SetPos(0, 6);
+        gridY++;
+        //y=7
+        c = SetPos(0, gridY);
         buttonSin = new JButton("sin");
+        buttonSin.setActionCommand("sin(");
         pane.add(buttonSin, c);
 
-        c = SetPos(1, 6);
+        c = SetPos(1, gridY);
         buttonCos = new JButton("cos");
+        buttonCos.setActionCommand("cos(");
         pane.add(buttonCos, c);
 
-        c = SetPos(2, 6);
+        c = SetPos(2, gridY);
         buttonTan = new JButton("tan");
+        buttonTan.setActionCommand("tan(");
         pane.add(buttonTan, c);
 
-        c = SetPos(0, 7);
-        buttonAsin = new JButton("asin");
-        pane.add(buttonAsin, c);
-
-        c = SetPos(1, 7);
-        buttonAcos = new JButton("acos");
-        pane.add(buttonAcos, c);
-
-        c = SetPos(2, 7);
-        buttonAtan = new JButton("atan");
-        pane.add(buttonAtan, c);
-
-        c = SetPos(3, 6);
+        c = SetPos(3, gridY);
         buttonLn = new JButton("ln");
+        buttonLn.setActionCommand("ln(");
         pane.add(buttonLn, c);
 
-        c = SetPos(4, 6);
+        c = SetPos(4, gridY);
         buttonMod = new JButton("%");
         pane.add(buttonMod, c);
 
-        c = SetPos(3, 7);
+        gridY++;
+        //y=8
+        c = SetPos(0, gridY);
+        buttonAsin = new JButton("asin");
+        buttonAsin.setActionCommand("asin(");
+        pane.add(buttonAsin, c);
+
+        c = SetPos(1, gridY);
+        buttonAcos = new JButton("acos");
+        buttonAcos.setActionCommand("acos(");
+        pane.add(buttonAcos, c);
+
+        c = SetPos(2, gridY);
+        buttonAtan = new JButton("atan");
+        buttonAtan.setActionCommand("atan(");
+        pane.add(buttonAtan, c);
+
+        c = SetPos(3, gridY);
         buttonPi = new JButton("pi");
-        buttonPi.setActionCommand(Double.toString(pi));
         pane.add(buttonPi, c);
 
-        c = SetPos(4, 7);
+        c = SetPos(4, gridY);
         buttonE = new JButton("e");
-        buttonE.setActionCommand(Double.toString(e));
         pane.add(buttonE, c);
 
         addToAll(listner);
@@ -267,6 +300,8 @@ public class MWindow implements ComponentListener {
         buttonAns.addActionListener(actionListener);
         buttonLn.addActionListener(actionListener);
         buttonMod.addActionListener(actionListener);
+        buttonaPP.addActionListener(actionListener);
+        buttonaMM.addActionListener(actionListener);
     }
 
     private void createAndShowGUI() {
@@ -284,7 +319,7 @@ public class MWindow implements ComponentListener {
         System.out.println(frame.getSize());
         Image image = new ImageIcon(MWindow.class.getResource("mIcon.png")).getImage();
         frame.setIconImage(image);
-
+        frame.setSize(500,500);
     }
 
     public void componentResized(ComponentEvent e) {
@@ -335,6 +370,8 @@ public class MWindow implements ComponentListener {
         buttonAtan.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
         buttonLn.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
         buttonMod.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonaPP.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
+        buttonaMM.setFont(new Font(Font.DIALOG, Font.BOLD, nSize));
 
     }
     /**
@@ -354,12 +391,14 @@ public class MWindow implements ComponentListener {
 
 
     public static void main(String[] args) {
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                MWindow Window = new MWindow();
-                Window.createAndShowGUI();
-            }
-            //окно было [width=230,height=193]
+        javax.swing.SwingUtilities.invokeLater(()->{
+            MWindow Window = new MWindow();
+            Window.createAndShowGUI();
         });
+        javax.swing.SwingUtilities.invokeLater(()-> {
+            GraphicsBuilder graphic = new GraphicsBuilder("sin(x)*x");
+            graphic.setVisible(true);
+        });
+
     }
 }

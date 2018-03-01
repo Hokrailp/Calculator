@@ -3,12 +3,32 @@ package BestAppEver;
 import java.util.ArrayList;
 
 class RPS {
+
+    protected static final double e = 2.718_281_828_459;
+    protected static final double pi = 3.141_592_653_589;
     private double result;
+    private String S;
+    private ArrayList<Stuff> stack = new ArrayList<>();
+    // change String to Stuff
+    private ArrayList<Stuff> InputS = new ArrayList<>();
+    private ArrayList<Stuff> OutputS = new ArrayList<>();
 
     //ant transform to Numeric
     private Numeric ReadMyNum(int ind, String sz) {
         char cH;
         int i = ind;
+
+        if (sz.charAt(ind) == 'e') {
+            Numeric thisRes = new Numeric(e);
+            thisRes.length = 1;
+            return thisRes;
+        }
+        if (sz.charAt(ind) == 'p') {
+            Numeric thisRes = new Numeric(pi);
+            thisRes.length = 2;
+            return thisRes;
+        }
+
         boolean flag = true;
         double dRes = 0d;
         double exponent = 0.1;
@@ -35,7 +55,24 @@ class RPS {
             }
 
         }
+        if (cH == 'E') {
+            ind++;
+            cH = sz.charAt(ind);
+            double e10 = 0;
+            while ((cH >= '0') && (cH <= '9') && (e10<10)) {
+                e10 *= 10;
+                e10 += Character.digit(cH, 10);
 
+                if (ind < sz.length() - 1) {
+                    ind++;
+                    cH = sz.charAt(ind);
+                } else {
+                    ind++;
+                    break;
+                }
+            }
+            dRes *= Math.pow(10, e10);
+        }
         Numeric thisRes = new Numeric(dRes);
         thisRes.length = ind-i;
         return thisRes;
@@ -79,7 +116,6 @@ class RPS {
 
     }
 
-
     // Common class for my tree
     abstract class Stuff {
         double me;
@@ -97,7 +133,7 @@ class RPS {
         int length;
     }
 
-    // Only '+''-' '/' '*' '^' and sin, cos, tan, atan, asin, acos
+    // Only '+''-' '/' '*' '^' and sin, cos, tan, atan, asin, acos, ln
     class Action extends Stuff {
 
         boolean isTrigonometryF(String actq) {
@@ -130,17 +166,9 @@ class RPS {
         int length;
     }
 
-    private String S;
-
     private void setS(String ss) {
         S = ss;
     }
-
-    private ArrayList<Stuff> stack = new ArrayList<>();
-
-    // change String to Stuff
-    private ArrayList<Stuff> InputS = new ArrayList<>();
-    private ArrayList<Stuff> OutputS = new ArrayList<>();
 
     //don`t touch it
     private void TransformSrtToStuff() {
@@ -148,7 +176,7 @@ class RPS {
         char ch;
         while (i < S.length()) {
             ch = S.charAt(i);
-            if ((ch >= '0') && (ch <= '9')) {
+            if ((ch >= '0') && (ch <= '9') || ((ch == 'p') || (ch == 'e'))) {
                 Numeric TempNum = ReadMyNum(i, S);
                 InputS.add(TempNum);
                 i += TempNum.length;
@@ -222,6 +250,7 @@ class RPS {
                 TempStack.add(OutputS.get(i));
             } else {
                 Numeric TempNum = new Numeric(0);
+                double rad;
                 switch (OutputS.get(i).action) {
                     // be accurate with /, asin, acos, tg, ln!!!
                     case "+":
@@ -265,18 +294,28 @@ class RPS {
                         TempStack.add(TempNum);
                         break;
                     case "sin":
-                        TempNum.me = Math.sin(TempStack.get(TempStack.size() - 1).me);
+                        //TODO: your choise
+                        rad = TempStack.get(TempStack.size() - 1).me;
+                        rad /= 180;
+                        rad *= pi;
+                        TempNum.me = Math.sin(rad);
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.add(TempNum);
                         break;
                     case "cos":
-                        TempNum.me = Math.cos(TempStack.get(TempStack.size() - 1).me);
+                        rad = TempStack.get(TempStack.size() - 1).me;
+                        rad /= 180;
+                        rad *= pi;
+                        TempNum.me = Math.cos(rad);
                         TempStack.remove(TempStack.size() - 1);
                         TempStack.add(TempNum);
                         break;
                     case "tan":
                         try {
-                            TempNum.me = Math.tan(TempStack.get(TempStack.size() - 1).me);
+                            rad = TempStack.get(TempStack.size() - 1).me;
+                            rad /= 180;
+                            rad *= pi;
+                            TempNum.me = Math.tan(rad);
                             TempStack.remove(TempStack.size() - 1);
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
@@ -285,8 +324,11 @@ class RPS {
                         break;
                     case "atan":
                         try {
-                            TempNum.me = Math.atan(TempStack.get(TempStack.size() - 1).me);
+                            rad = TempStack.get(TempStack.size() - 1).me;
+                            TempNum.me = Math.atan(rad);
                             TempStack.remove(TempStack.size() - 1);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -294,8 +336,11 @@ class RPS {
                         break;
                     case "asin":
                         try {
-                            TempNum.me = Math.asin(TempStack.get(TempStack.size() - 1).me);
+                            rad = TempStack.get(TempStack.size() - 1).me;
+                            TempNum.me = Math.asin(rad);
                             TempStack.remove(TempStack.size() - 1);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -303,8 +348,11 @@ class RPS {
                         break;
                     case "acos":
                         try {
-                            TempNum.me = Math.acos(TempStack.get(TempStack.size() - 1).me);
+                            rad = TempStack.get(TempStack.size() - 1).me;
+                            TempNum.me = Math.acos(rad);
                             TempStack.remove(TempStack.size() - 1);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -338,7 +386,11 @@ class RPS {
         setS(S);
         TransformSrtToStuff();
         TransformListToRPN();
-        return CalculateWithRPN();
+        double res = CalculateWithRPN();
+        stack.clear();
+        InputS.clear();
+        OutputS.clear();
+        return res;
     }
 
     RPS(String St) {
