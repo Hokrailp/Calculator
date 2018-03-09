@@ -1,14 +1,34 @@
 package BestAppEver;
 
-import java.util.ArrayList;
+import java.util.*;
 
 class RPS {
+
+    protected static final double e = Math.E;
+    protected static final double pi = Math.PI;
     private double result;
+    private String S;
+    private Stack<Stuff> stack = new Stack<>();//done
+    // change String to Stuff
+    private List<Stuff> InputS;//?
+    private List<Stuff> OutputS = new LinkedList<>();//?
 
     //ant transform to Numeric
     private Numeric ReadMyNum(int ind, String sz) {
         char cH;
         int i = ind;
+
+        if (sz.charAt(ind) == 'e') {
+            Numeric thisRes = new Numeric(e);
+            thisRes.length = 1;
+            return thisRes;
+        }
+        if (sz.charAt(ind) == 'p') {
+            Numeric thisRes = new Numeric(pi);
+            thisRes.length = 2;
+            return thisRes;
+        }
+
         boolean flag = true;
         double dRes = 0d;
         double exponent = 0.1;
@@ -35,9 +55,26 @@ class RPS {
             }
 
         }
+        if (cH == 'E') {
+            ind++;
+            cH = sz.charAt(ind);
+            double e10 = 0;
+            while ((cH >= '0') && (cH <= '9') && (e10 < 10)) {
+                e10 *= 10;
+                e10 += Character.digit(cH, 10);
 
+                if (ind < sz.length() - 1) {
+                    ind++;
+                    cH = sz.charAt(ind);
+                } else {
+                    ind++;
+                    break;
+                }
+            }
+            dRes *= Math.pow(10, e10);
+        }
         Numeric thisRes = new Numeric(dRes);
-        thisRes.length = ind-i;
+        thisRes.length = ind - i;
         return thisRes;
 
     }
@@ -50,17 +87,17 @@ class RPS {
         cH = sz.charAt(ind);
         int probLen = 1;
 
-        if (    cH == 's' ||
+        if (cH == 's' ||
                 cH == 'c' ||
                 cH == 't')
             probLen = 3;
         else if (cH == 'a')
             probLen = 4;
-        //ln
+            //ln
         else if (cH == 'l')
             probLen = 2;
 
-        while (ind-i < probLen) {
+        while (ind - i < probLen) {
             cRes += cH;
 
             if (ind < sz.length() - 1) {
@@ -72,13 +109,19 @@ class RPS {
             }
 
         }
-
-        Action thisRes = new Action(cRes);
-        thisRes.length = ind-i;
+        Action thisRes;
+        if (cRes.equals("-")) {
+            if ((InputS.size()<1) || (InputS.get(InputS.size()-1).priority != 0)) {
+                thisRes = new Action(cRes,true);
+                thisRes.length = ind - i;
+                return thisRes;
+            }
+        }
+        thisRes = new Action(cRes);
+        thisRes.length = ind - i;
         return thisRes;
 
     }
-
 
     // Common class for my tree
     abstract class Stuff {
@@ -97,16 +140,16 @@ class RPS {
         int length;
     }
 
-    // Only '+''-' '/' '*' '^' and sin, cos, tan, atan, asin, acos
+    // Only '+''-' '/' '*' '^' and sin, cos, tan, atan, asin, acos, ln
     class Action extends Stuff {
 
         boolean isTrigonometryF(String actq) {
-        //only sin, cos, tan, atan, asin, acos
-            if (    actq.equals("sin") ||
+            //only sin, cos, tan, atan, asin, acos
+            if (actq.equals("sin") ||
                     actq.equals("cos") ||
                     actq.equals("tan") ||
-                    actq.equals("atan")||
-                    actq.equals("asin")||
+                    actq.equals("atan") ||
+                    actq.equals("asin") ||
                     actq.equals("acos"))
                 return true;
             return false;
@@ -116,46 +159,56 @@ class RPS {
             action = act;
             if (action.equals("^"))
                 priority = 5;
-            else if (isTrigonometryF(action) || action.equals("ln"))
+            else if (isTrigonometryF(action) || action.equals("ln")) {
                 priority = 4;
-            else if ((action.equals("*")) || (action.equals("/")))
+            }
+            else if ((action.equals("*")) || (action.equals("/"))) {
                 priority = 3;
-            else if ((action.equals("+")) || (action.equals("-")))
+            }
+            else if ((action.equals("+")) || (action.equals("-")) || action.equals("%")) {
                 priority = 2;
+                beforeNum = false;
+            }
             else
                 priority = 1; //только у скобок
             // 0 только у чисел
         }
 
+        Action(String act, boolean flag) {
+            action = act;
+            priority = 2;
+            beforeNum = flag;
+        }
         int length;
-    }
 
-    private String S;
+        boolean beforeNum;
+    }
 
     private void setS(String ss) {
         S = ss;
     }
 
-    private ArrayList<Stuff> stack = new ArrayList<>();
-
-    // change String to Stuff
-    private ArrayList<Stuff> InputS = new ArrayList<>();
-    private ArrayList<Stuff> OutputS = new ArrayList<>();
-
     //don`t touch it
     private void TransformSrtToStuff() {
+        if (S != null)
+            InputS = new ArrayList<>(S.length() / 5);
+        else InputS = new ArrayList<>();
         int i = 0;
         char ch;
         while (i < S.length()) {
             ch = S.charAt(i);
-            if ((ch >= '0') && (ch <= '9')) {
+            if ((ch >= '0') && (ch <= '9') || ((ch == 'p') || (ch == 'e'))) {
                 Numeric TempNum = ReadMyNum(i, S);
                 InputS.add(TempNum);
                 i += TempNum.length;
             } else {
                 Action TempAct = ReadMyAct(i, S);
-                InputS.add(TempAct);
-                i += TempAct.length;
+                if (TempAct.action.equals(" ")) {
+                    i++;
+                } else {
+                    InputS.add(TempAct);
+                    i += TempAct.length;
+                }
             }
         }
     }
@@ -172,34 +225,31 @@ class RPS {
             } else if (InputS.get(i).priority == 1) {
                 // If '('...
                 if (InputS.get(i).action.equals("("))
-                    stack.add(InputS.get(i));
+                    stack.push(InputS.get(i));
                     //Or ')' ...
                 else if (InputS.get(i).action.equals(")")) {
                     //до открывающей скобки выпихиваем в output
-                    while (!stack.get(stack.size() - 1).action.equals("(")) {
-                        OutputS.add(stack.get(stack.size() - 1));
-                        stack.remove(stack.size() - 1);
+                    while (!stack.peek().action.equals("(")) {
+                        OutputS.add(stack.pop());
                     }
                     //Delete '(' from stack
-                    stack.remove(stack.size() - 1);
+                    stack.pop();
                 }
             } else {
                 // If act - ...
                 try {
-                    boolean RedFlag = (stack.get(stack.size() - 1) == null);
+                    boolean RedFlag = (stack.peek() == null);
                     if (RedFlag) {
-                        stack.add(InputS.get(i));
+                        stack.push(InputS.get(i));
                     } else { // while priority act1 <= act2 on top of stack - act2 to output
-                        while ((InputS.get(i).priority <= stack.get(stack.size() - 1).priority)
-                                && (stack.get(stack.size() - 1).priority > 1)) {
-                            OutputS.add(stack.get(stack.size() - 1));
-                            stack.remove(stack.size() - 1);
+                        while ((InputS.get(i).priority <= stack.peek().priority)
+                                && (stack.peek().priority > 1)) {
+                            OutputS.add(stack.pop());
                         }
-                        //stack.add(InputS.get(i));
                     }
-                    stack.add(InputS.get(i));
+                    stack.push(InputS.get(i));
                 } catch (Exception exc) {
-                    stack.add(InputS.get(i));
+                    stack.push(InputS.get(i));
                 }
             }
             i++;
@@ -212,72 +262,90 @@ class RPS {
         }
     }
 
-    // Gonna calculate reverse polish notation, +-*/^
+    // Gonna calculate reverse polish notation
     private double CalculateWithRPN() {
-        ArrayList<Stuff> TempStack = new ArrayList<>();
+        Stack<Stuff> TempStack = new Stack<>();
         //OutputS is input here)
         int i = 0;
+        Stuff Num1,Num2;
         while (i < OutputS.size()) {
             if (OutputS.get(i).priority == 0) {
-                TempStack.add(OutputS.get(i));
+                TempStack.push(OutputS.get(i));
             } else {
                 Numeric TempNum = new Numeric(0);
+                double rad;
+                Action act = (Action) OutputS.get(i);
+                //it is "-" before Number then
+                if (act.beforeNum) {
+                    Num1 = TempStack.pop();
+                    TempNum.me = -1*Num1.me;
+                    TempStack.push(TempNum);
+                    i++;
+                    continue;
+                }
                 switch (OutputS.get(i).action) {
                     // be accurate with /, asin, acos, tg, ln!!!
                     case "+":
-                        TempNum.me = TempStack.get(TempStack.size() - 2).me + TempStack.get(TempStack.size() - 1).me;
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        Num1 = TempStack.pop();
+                        Num2 = TempStack.pop();
+                        TempNum.me = Num2.me + Num1.me;
+                        TempStack.push(TempNum);
                         break;
                     case "-":
-                        TempNum.me = TempStack.get(TempStack.size() - 2).me - TempStack.get(TempStack.size() - 1).me;
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        Num1 = TempStack.pop();
+                        Num2 = TempStack.pop();
+                        TempNum.me = Num2.me - Num1.me;
+                        TempStack.push(TempNum);
                         break;
                     case "*":
-                        TempNum.me = TempStack.get(TempStack.size() - 2).me * TempStack.get(TempStack.size() - 1).me;
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        Num1 = TempStack.pop();
+                        Num2 = TempStack.pop();
+                        TempNum.me = Num2.me * Num1.me;
+                        TempStack.push(TempNum);
                         break;
                     case "/":
                         try {
-                            TempNum.me = TempStack.get(TempStack.size() - 2).me / TempStack.get(TempStack.size() - 1).me;
-                            TempStack.remove(TempStack.size() - 1);
-                            TempStack.remove(TempStack.size() - 1);
-                            TempStack.add(TempNum);
+                            Num1 = TempStack.pop();
+                            Num2 = TempStack.pop();
+                            TempNum.me = Num2.me / Num1.me;
+                            TempStack.push(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
                         }
                         break;
                     case "^":
-                        TempNum.me = Math.pow(TempStack.get(TempStack.size() - 2).me, TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        Num1 = TempStack.pop();
+                        Num2 = TempStack.pop();
+                        TempNum.me = Math.pow(Num2.me, Num1.me);
+                        TempStack.push(TempNum);
                         break;
                     case "%":
-                        TempNum.me = TempStack.get(TempStack.size() - 2).me % TempStack.get(TempStack.size() - 1).me;
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.remove(TempStack.size() - 1);
-                        TempStack.add(TempNum);
+                        Num1 = TempStack.pop();
+                        Num2 = TempStack.pop();
+                        TempNum.me = Num2.me % Num1.me;
+                        TempStack.push(TempNum);
                         break;
                     case "sin":
-                        TempNum.me = Math.sin(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
+                        //TODO: your choise
+                        rad = TempStack.pop().me;
+                        rad /= 180;
+                        rad *= pi;
+                        TempNum.me = Math.sin(rad);
                         TempStack.add(TempNum);
                         break;
                     case "cos":
-                        TempNum.me = Math.cos(TempStack.get(TempStack.size() - 1).me);
-                        TempStack.remove(TempStack.size() - 1);
+                        rad = TempStack.pop().me;
+                        rad /= 180;
+                        rad *= pi;
+                        TempNum.me = Math.cos(rad);
                         TempStack.add(TempNum);
                         break;
                     case "tan":
                         try {
-                            TempNum.me = Math.tan(TempStack.get(TempStack.size() - 1).me);
-                            TempStack.remove(TempStack.size() - 1);
+                            rad = TempStack.pop().me;
+                            rad /= 180;
+                            rad *= pi;
+                            TempNum.me = Math.tan(rad);
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -285,8 +353,10 @@ class RPS {
                         break;
                     case "atan":
                         try {
-                            TempNum.me = Math.atan(TempStack.get(TempStack.size() - 1).me);
-                            TempStack.remove(TempStack.size() - 1);
+                            rad = TempStack.pop().me;
+                            TempNum.me = Math.atan(rad);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -294,8 +364,10 @@ class RPS {
                         break;
                     case "asin":
                         try {
-                            TempNum.me = Math.asin(TempStack.get(TempStack.size() - 1).me);
-                            TempStack.remove(TempStack.size() - 1);
+                            rad = TempStack.pop().me;
+                            TempNum.me = Math.asin(rad);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -303,8 +375,10 @@ class RPS {
                         break;
                     case "acos":
                         try {
-                            TempNum.me = Math.acos(TempStack.get(TempStack.size() - 1).me);
-                            TempStack.remove(TempStack.size() - 1);
+                            rad = TempStack.pop().me;
+                            TempNum.me = Math.acos(rad);
+                            TempNum.me *= 180;
+                            TempNum.me /= pi;
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -312,8 +386,7 @@ class RPS {
                         break;
                     case "ln":
                         try {
-                            TempNum.me = Math.log(TempStack.get(TempStack.size() - 1).me);
-                            TempStack.remove(TempStack.size() - 1);
+                            TempNum.me = Math.log(TempStack.pop().me);
                             TempStack.add(TempNum);
                         } catch (Exception exc) {
                             return Double.NaN;
@@ -323,8 +396,8 @@ class RPS {
                         break;
                 }
             }
-                i++;
-            }
+            i++;
+        }
         if (TempStack.size() == 1) {
             return TempStack.get(0).me;
         } else {
@@ -338,12 +411,17 @@ class RPS {
         setS(S);
         TransformSrtToStuff();
         TransformListToRPN();
-        return CalculateWithRPN();
+        double res = CalculateWithRPN();
+        stack.clear();
+        InputS.clear();
+        OutputS.clear();
+        return res;
     }
 
     RPS(String St) {
         result = DoAllWork(St);
     }
+
     RPS() {
         result = 0;
     }
