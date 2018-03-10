@@ -396,11 +396,16 @@ public class MWindow implements ComponentListener {
         javax.swing.SwingUtilities.invokeLater(()->{
             MWindow Window = new MWindow();
             Window.createAndShowGUI();
+            System.out.println("window t");
         });
 
-        javax.swing.SwingUtilities.invokeLater(()->{
-            GraphicsBuilder graphic = new GraphicsBuilder("sin(x*180/pi)*x");
+        Thread thr = new Thread(() -> {
+            GraphicsBuilder graphic = new GraphicsBuilder("cos(30*x)/x*ln(x^6+2)");
             graphic.setVisible(true);
+            System.out.println("other t");
         });
+        thr.setDaemon(true);
+        thr.start();
+        System.out.println("this t");
     }
 }
