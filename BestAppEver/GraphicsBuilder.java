@@ -35,17 +35,19 @@ class DrawingComponent extends JPanel implements GraphicsInterface{
     private RPS Calculater = new RPS();
 
     //start and end of your curve
-    private static int Xstart = 0;
-    private static double Step = 1;
+    private static int Xstart = -10;
+    private static int Xend = 10;
+    private static double Step = 0.1;
     //min of function on segment
-    private static double minY = Double.MAX_VALUE;
+    private static double avg = 0;
+
 
     //replace 'X' in S to your num (x0)
     public String replaceX(String S, double x0) {
         StringBuilder mString = new StringBuilder(S);
         int index = mString.indexOf("x");
         while (index >= 0) {
-            mString.replace(index, index+1, String.valueOf(x0));
+            mString.replace(index, index+1, "("+String.valueOf(x0)+")");
             index = mString.indexOf("x");
         }
         return mString.toString();
@@ -54,7 +56,7 @@ class DrawingComponent extends JPanel implements GraphicsInterface{
     //trim Y val to widow using start and step
     public int trimToWindow(double Y, double min, double step, int h) {
         double res = (Y-min)/step;
-        return h-(int)res-50;
+        return h-(int)res-50-MWindow.heigh;
     }
 
     //for every X - evaluation Y to plot it (from your range)
@@ -68,19 +70,29 @@ class DrawingComponent extends JPanel implements GraphicsInterface{
             //replace "X" with value of X
             fX = replaceX(Xexpression, curX);
             dYarray[i] = Calculater.DoAllWork(fX);
-            //search min value
-            if (dYarray[i] < minY) {
-                minY = dYarray[i];
-            }
+            //calculate imagine avg
+            avg += dYarray[i];
             Xarray[i] = i;
             curX += Step;
         }
+        avg /= dYarray.length;
         //trim all Y
         for (int i = 0; i < Xarray.length; i++) {
-            Yarray[i] = trimToWindow(dYarray[i], minY, Step, GraphicsBuilder.h);
+            Yarray[i] = trimToWindow(dYarray[i], avg, Step, GraphicsBuilder.h);
             painter.drawLine(Xarray[i], Yarray[i], Xarray[i], Yarray[i]+1);
-            painter.drawLine(Xarray[i]+1, Yarray[i], Xarray[i]+1, Yarray[i]+1);
         }
         painter.drawPolyline(Xarray, Yarray, Xarray.length);
+        /**
+        int i = 0;
+        while (true) {
+            i++;
+            System.out.println();
+            if (i==Integer.MAX_VALUE-10) {
+                System.out.println("Hello World");
+                break;
+            }
+        }
+        */
+
     }
 }

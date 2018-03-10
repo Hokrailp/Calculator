@@ -1,7 +1,5 @@
 package BestAppEver;
 
-import javafx.application.Application;
-
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -34,10 +32,12 @@ public class MWindow implements ComponentListener {
 
     static int accuruty = 2;
 
+    static int heigh = 200;
+
     //im declorating my things
     //new components
-    final static String CALCANEL = "Панель с калькулятором";
-    final static String GRAFPANEL   = "Панель с графиком";
+    final static String CALCPANEL = "Calculator Panel";
+    final static String GRAFPANEL   = "Graphic Panel";
 
     static JComboBox<String> combobox;
 
@@ -76,7 +76,7 @@ public class MWindow implements ComponentListener {
         pane.setLayout(new GridBagLayout());
         ButtonListner listner = new ButtonListner();
         GridBagConstraints c = SetPos(0, 0, 1, 5);
-        combobox= new JComboBox<>(new String[] {CALCANEL, GRAFPANEL});
+        combobox= new JComboBox<>(new String[] {CALCPANEL, GRAFPANEL});
         pane.add(combobox,c);
 
 
@@ -332,6 +332,7 @@ public class MWindow implements ComponentListener {
         double ka = Math.sqrt(wid*heg/(w*h));
         double newSize = startS*ka;
         FontAll((int)newSize);
+        heigh = heg;
     }
 
     private void FontAll(int nSize) {
@@ -391,14 +392,15 @@ public class MWindow implements ComponentListener {
 
 
     public static void main(String[] args) {
+
         javax.swing.SwingUtilities.invokeLater(()->{
             MWindow Window = new MWindow();
             Window.createAndShowGUI();
         });
-        javax.swing.SwingUtilities.invokeLater(()-> {
-            GraphicsBuilder graphic = new GraphicsBuilder("sin(x)*x");
+
+        javax.swing.SwingUtilities.invokeLater(()->{
+            GraphicsBuilder graphic = new GraphicsBuilder("sin(x*180/pi)*x");
             graphic.setVisible(true);
         });
-
     }
 }
